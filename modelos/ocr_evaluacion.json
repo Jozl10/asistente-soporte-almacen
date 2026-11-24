@@ -1,0 +1,65 @@
+{
+  "capturas_app": 54,
+  "con_texto_util": 53,
+  "confianza_media": 92.2,
+  "ms_promedio": 579,
+  "ms_maximo": 1429,
+  "con_ticket_etiquetado": 37,
+  "umbral_captura": 0.2,
+  "solo_con_la_captura": {
+    "umbral": 0.2,
+    "acierta": 10,
+    "pide_descripcion": 27,
+    "se_equivoca": 0
+  },
+  "por_umbral": [
+    {
+      "umbral": -0.5,
+      "acierta": 13,
+      "pide_descripcion": 18,
+      "se_equivoca": 6
+    },
+    {
+      "umbral": -0.25,
+      "acierta": 13,
+      "pide_descripcion": 19,
+      "se_equivoca": 5
+    },
+    {
+      "umbral": 0.0,
+      "acierta": 10,
+      "pide_descripcion": 25,
+      "se_equivoca": 2
+    },
+    {
+      "umbral": 0.1,
+      "acierta": 10,
+      "pide_descripcion": 27,
+      "se_equivoca": 0
+    },
+    {
+      "umbral": 0.2,
+      "acierta": 10,
+      "pide_descripcion": 27,
+      "se_equivoca": 0
+    },
+    {
+      "umbral": 0.3,
+      "acierta": 10,
+      "pide_descripcion": 27,
+      "se_equivoca": 0
+    },
+    {
+      "umbral": 0.4,
+      "acierta": 7,
+      "pide_descripcion": 30,
+      "se_equivoca": 0
+    },
+    {
+      "umbral": 0.5,
+      "acierta": 6,
+      "pide_descripcion": 31,
+      "se_equivoca": 0
+    }
+  ]
+}

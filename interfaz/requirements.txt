@@ -1,0 +1,5 @@
+# Lo que necesita la pantalla en Streamlit Community Cloud. Los modelos y el agente viven en
+# la API, así que aquí no van TensorFlow ni scikit-learn.
+streamlit>=1.43
+requests>=2.31
+pillow>=10.0

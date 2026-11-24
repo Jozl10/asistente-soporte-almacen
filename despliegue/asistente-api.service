@@ -1,0 +1,19 @@
+# API del asistente de soporte. La instala despliegue/preparar_servidor.sh.
+# Solo escucha en 127.0.0.1: desde fuera se llega por el túnel de Cloudflare.
+[Unit]
+Description=API del asistente de soporte (Flask con gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/asistente
+EnvironmentFile=/etc/asistente-api.env
+# Un solo proceso con 4 hilos: así los modelos se cargan una vez (TensorFlow ocupa casi 1 GB).
+# El tiempo de espera es largo porque cargar TensorFlow tarda.
+ExecStart=/home/ubuntu/asistente/venv/bin/gunicorn -w 1 --threads 4 --timeout 120 -b 127.0.0.1:5000 "api.app:create_app()"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

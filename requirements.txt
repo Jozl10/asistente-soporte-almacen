@@ -1,1 +1,23 @@
-nltk>=3.9
+# API de Flask con el agente y los dos clasificadores (lo que corre en el servidor).
+# Las versiones de los modelos van fijas, iguales a las del Avance 2: un modelo guardado con
+# una versión de scikit-learn o de Keras puede no cargar con otra.
+nltk==3.10.4
+numpy==2.5.4
+pandas==3.1.0
+scikit-learn==1.9.1
+joblib==1.6.0
+tensorflow==2.21.0
+keras==3.15.1
+pillow==13.0.0
+# API REST y servidor para producción (en la Mac basta con el servidor de Flask).
+flask>=3.0
+gunicorn>=23.0
+# OCR: lee el texto de la alerta en la captura. Necesita Tesseract instalado en el sistema
+# (brew install tesseract / apt install tesseract-ocr) y el modelo de español en tessdata/.
+pytesseract>=0.3.10
+# Conector con un Service Desk real (en modo simulado no se usa).
+requests>=2.31
+# Pruebas automáticas.
+pytest>=8.0
+# Certificados SSL para bajar los pesos de EfficientNetB0 con el Python de python.org en macOS.
+certifi

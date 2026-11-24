@@ -1,0 +1,16 @@
+# Túnel rápido de Cloudflare hacia la API. Lo instala despliegue/preparar_servidor.sh.
+# No necesita cuenta ni dominio: Cloudflare le da una dirección https://<algo>.trycloudflare.com
+# que cambia cada vez que el túnel arranca. Esa dirección va en el secreto API_URL de Streamlit.
+[Unit]
+Description=Túnel rápido de Cloudflare hacia la API del asistente
+After=network-online.target asistente-api.service
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+ExecStart=/usr/bin/cloudflared tunnel --no-autoupdate --metrics 127.0.0.1:20241 --url http://127.0.0.1:5000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

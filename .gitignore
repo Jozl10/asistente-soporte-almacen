@@ -1,0 +1,20 @@
+# Sirve aquí y en el repositorio público de GitHub.
+
+# Datos de la empresa: tickets y capturas reales. Nunca se suben.
+datos-privados/
+
+# Modelos entrenados: se generan con entrenar_texto.py y el notebook del Avance 2.
+modelos/*.joblib
+modelos/*.keras
+
+# Modelo de español de Tesseract (13 MB): se baja con el comando del README.
+tessdata/
+
+# Bitácora de la API y tickets del Service Desk simulado: traen lo que escriben los usuarios.
+bitacora/
+
+# Entorno de Python y cachés.
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
