@@ -24,6 +24,7 @@ entrenar_texto.py     vuelve a entrenar el clasificador de intenciones
 calibrar_umbral.py    escoge el umbral del "no sé" con validación cruzada
 evaluar_ocr.py        mide el OCR con las capturas reales (solo números agregados)
 pruebas/              pruebas automáticas (pytest)
+pruebas_funcionales.py  pruebas de punta a punta contra la app publicada (Playwright y Chrome)
 datos/                ejemplos generados con apoyo de IA y revisados
 modelos/              modelos entrenados (no se suben) y la lista de clases de imagen
 ```
@@ -159,6 +160,27 @@ fuera lo que escribieron otros usuarios. En el servidor público siempre se defi
 
 En el servidor, las variables van en `/etc/asistente-api.env`: Service Desk simulado, la
 prueba de falla y la clave de administración, que se genera ahí y no está en el repo.
+
+### Pruebas funcionales
+
+`pruebas_funcionales.py` abre la app publicada en Chrome y conversa como un usuario en 13
+escenarios:
+
+- la solución de la documentación, el ticket completo, una solicitud y la captura sola con
+  OCR;
+- la captura del escritorio, la foto de la etiqueta, el "no sé", el saludo y cancelar;
+- una imagen dañada, Service Desk caído y la API caída;
+- el modo WebView en la pantalla del Zebra (360×640).
+
+En cada paso revisa que la respuesta sea la esperada, toma una captura y mide cuánto tarda en
+contestar. Además prueba la API directo con 10 entradas inválidas y guarda `/metricas`. No va
+con pytest porque necesita la app publicada:
+
+```bash
+pip install playwright        # usa el Chrome instalado en la máquina
+CLAVE_ADMIN=... python pruebas_funcionales.py --api https://<túnel> --salida <carpeta> \
+  --ssh ubuntu@<ip-de-la-ec2>
+```
 
 ## Repositorio público
 

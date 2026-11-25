@@ -39,6 +39,8 @@ TIEMPO_MAXIMO = 30
 BIENVENIDA = ("Hola, soy el asistente automático de soporte. Cuéntame qué problema tienes "
               "con la app y te doy la solución o levanto el ticket por ti. Puedes adjuntar una "
               "captura con el clip. Si necesitas a una persona, llama a soporte.")
+NO_DISPONIBLE = ("El asistente no está disponible en este momento. Puedes intentar de nuevo en "
+                 "unos minutos; si es urgente, llama a soporte.")
 
 
 def direccion_api():
@@ -113,6 +115,10 @@ def llamar_api(sesion, mensaje, imagen=None, nombre=None, tipo=None):
     try:
         cuerpo = respuesta.json()
     except ValueError:
+        # Con la API apagada, el túnel de Cloudflare contesta su propia página de error (502)
+        # en HTML: para el usuario, el asistente no está disponible.
+        if respuesta.status_code >= 500:
+            return None, NO_DISPONIBLE
         return None, "El asistente contestó algo que no entendí. Intenta de nuevo."
     if respuesta.status_code == 400 and cuerpo.get("error") == "estado_invalido":
         st.session_state.estado = None
@@ -204,8 +210,7 @@ else:
     st.caption("Asistente de Cliente recoge e Inventario físico")
 
 if salud is None:
-    st.warning("El asistente no está disponible en este momento. Puedes intentar de nuevo en "
-               "unos minutos; si es urgente, llama a soporte.")
+    st.warning(NO_DISPONIBLE)
 elif salud["service_desk"]["modo"] == "simulado" and not dentro_de_la_app:
     st.info("Demostración: los tickets se levantan en un Service Desk simulado (folios SIM-), "
             "no en el real.")

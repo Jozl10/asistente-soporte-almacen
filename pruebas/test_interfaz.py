@@ -19,6 +19,8 @@ class Respuesta:
         self._datos = datos
 
     def json(self):
+        if self._datos is None:  # una página HTML, como la de error del túnel
+            raise ValueError("no es JSON")
         return self._datos
 
 
@@ -104,6 +106,17 @@ def test_si_la_api_no_contesta_avisa_y_ofrece_reintentar():
     assert "Ya contesté." in textos(at)
     assert post.call_args.kwargs["data"]["mensaje"] == "no puedo cerrar el inventario"
     assert not any(b.label == "Reintentar" for b in at.button)
+
+
+def test_si_la_api_esta_apagada_detras_del_tunel_dice_que_no_esta_disponible():
+    # Lo encontró la prueba funcional F12: con la API apagada, el túnel de Cloudflare contesta
+    # 502 con una página HTML, y la pantalla decía "contestó algo que no entendí".
+    at = abrir()
+    with mock.patch("requests.get", return_value=Respuesta(200, SALUD)), \
+            mock.patch("requests.post", return_value=Respuesta(502, None)):
+        at.chat_input[0].set_value("no puedo cerrar el inventario").run()
+    assert "no está disponible" in at.error[0].value
+    assert any(b.label == "Reintentar" for b in at.button)
 
 
 def test_error_de_la_api_muestra_su_mensaje():
