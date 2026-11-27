@@ -3,8 +3,9 @@
 #
 #     despliegue/subir.sh ubuntu@<ip-de-la-ec2>
 #
-# No sube los datos privados (tickets y capturas reales), la bitácora ni el entorno de Python.
-# Tampoco reinicia el túnel: si se reinicia, cambia su dirección.
+# No sube los datos privados (tickets y capturas reales), la bitácora, el entorno de Python ni
+# el demo de Flutter, que no corre en el servidor. Tampoco reinicia el túnel: si se reinicia,
+# cambia su dirección.
 set -euo pipefail
 
 DESTINO="${1:?Uso: despliegue/subir.sh ubuntu@<ip-de-la-ec2>}"
@@ -13,7 +14,7 @@ cd "$(dirname "$0")/.."
 
 rsync -az --delete -e "ssh -i $LLAVE" \
   --exclude datos-privados/ --exclude bitacora/ --exclude venv/ --exclude .venv/ \
-  --exclude __pycache__/ --exclude .pytest_cache/ --exclude .DS_Store \
+  --exclude __pycache__/ --exclude .pytest_cache/ --exclude .DS_Store --exclude demo_webview/ \
   ./ "$DESTINO:asistente/"
 
 # La primera vez el servicio todavía no existe: lo crea preparar_servidor.sh.
