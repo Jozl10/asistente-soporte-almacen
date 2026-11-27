@@ -143,6 +143,11 @@ def limpiar_sesion(sesion):
     return limpia
 
 
+def intencion_de(resultado):
+    """La intención del clasificador de texto, u "otro" si quedó abajo del umbral."""
+    return resultado["intencion"] if resultado["segura"] else "otro"
+
+
 def leer_aplicacion(palabras):
     if palabras & {"cliente", "recoge"}:
         return "cliente_recoge"
@@ -208,21 +213,40 @@ class AgenteSoporte:
         texto, fuente = (mensaje, "mensaje") if mensaje else (leido, "captura")
         if texto and estado.fase == "esperando_consulta":
             permitidas = intenciones_de_app(estado.aplicacion) if estado.aplicacion else None
-            resultado = self.texto.predecir(texto, permitidas)
-            resultado["fuente"] = fuente
+            resultado = self._clasificar(texto, fuente, permitidas, estado, traza)
+            # "Me sale este aviso" no dice cuál es el problema, pero la alerta de la captura
+            # sí: si el mensaje no se entendió y lo leído alcanza, se usa lo leído.
+            if fuente == "mensaje" and leido and intencion_de(resultado) == "otro":
+                de_la_captura = self._clasificar(leido, "captura", permitidas, estado, traza)
+                if self._alcanza_captura(de_la_captura):
+                    traza.append({"paso": "percibir", "detalle": "El mensaje no dice el problema, "
+                                  "pero lo leído en la captura sí: se usa lo leído"})
+                    resultado = de_la_captura
             percepcion.texto = resultado
-            origen = "Texto" if fuente == "mensaje" else "Texto de la captura"
-            detalle = f"{origen} → {resultado['intencion']} (puntuación {resultado['puntuacion']:.2f})"
-            if resultado["intencion_modelo"] != resultado["intencion"]:
-                detalle += (f"; el modelo prefería {resultado['intencion_modelo']}, que no es de "
-                            f"{APLICACIONES[estado.aplicacion]}")
-            if not resultado["segura"]:
-                detalle += "; abajo del umbral de confianza"
-            traza.append({"paso": "percibir", "detalle": detalle})
         elif mensaje:
             traza.append({"paso": "percibir",
                           "detalle": f"Texto: respuesta en la fase {estado.fase} (no se clasifica)"})
         return percepcion
+
+    def _clasificar(self, texto, fuente, permitidas, estado, traza):
+        resultado = self.texto.predecir(texto, permitidas)
+        resultado["fuente"] = fuente
+        origen = "Texto" if fuente == "mensaje" else "Texto de la captura"
+        detalle = f"{origen} → {resultado['intencion']} (puntuación {resultado['puntuacion']:.2f})"
+        if resultado["intencion_modelo"] != resultado["intencion"]:
+            detalle += (f"; el modelo prefería {resultado['intencion_modelo']}, que no es de "
+                        f"{APLICACIONES[estado.aplicacion]}")
+        if not resultado["segura"]:
+            detalle += "; abajo del umbral de confianza"
+        traza.append({"paso": "percibir", "detalle": detalle})
+        return resultado
+
+    def _alcanza_captura(self, resultado):
+        """Lo leído en una captura solo basta si es un problema conocido, no un saludo, y con
+        la puntuación que se le pide a la captura."""
+        intencion = intencion_de(resultado)
+        return (intencion != "otro" and INTENCIONES[intencion]["atencion"] != "conversacion"
+                and resultado["puntuacion"] >= self.umbral_captura)
 
     def _leer_captura(self, contenido, resultado, traza):
         """OCR, solo en las capturas de la app: ahí salen las alertas del escáner."""
@@ -268,11 +292,9 @@ class AgenteSoporte:
         # Fase esperando_consulta.
         if not p.texto:
             return Decision("pedir_descripcion", "reactiva", "llegó una imagen sin mensaje")
-        intencion = p.texto["intencion"] if p.texto["segura"] else "otro"
+        intencion = intencion_de(p.texto)
         info = INTENCIONES[intencion]
-        if p.texto["fuente"] == "captura" and (
-                intencion == "otro" or info["atencion"] == "conversacion"
-                or p.texto["puntuacion"] < self.umbral_captura):
+        if p.texto["fuente"] == "captura" and not self._alcanza_captura(p.texto):
             return Decision("pedir_descripcion", "reactiva",
                             "lo que se leyó en la captura no alcanza para saber el problema "
                             f"(para la captura se pide puntuación de {self.umbral_captura})")
@@ -394,7 +416,7 @@ class AgenteSoporte:
 
     # ------------------------------------------------------------------ ayudantes
     def _recordar_consulta(self, p, e, traza):
-        intencion = p.texto["intencion"] if p.texto["segura"] else "otro"
+        intencion = intencion_de(p.texto)
         e.intencion = intencion
         if intencion != "otro":
             e.no_entendidos = 0

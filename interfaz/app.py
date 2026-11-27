@@ -38,7 +38,7 @@ FORMATOS = ["png", "jpg", "jpeg", "webp"]
 TIEMPO_MAXIMO = 30
 BIENVENIDA = ("Hola, soy el asistente automático de soporte. Cuéntame qué problema tienes "
               "con la app y te doy la solución o levanto el ticket por ti. Puedes adjuntar una "
-              "captura con el clip. Si necesitas a una persona, llama a soporte.")
+              "captura con el botón +. Si necesitas a una persona, llama a soporte.")
 NO_DISPONIBLE = ("El asistente no está disponible en este momento. Puedes intentar de nuevo en "
                  "unos minutos; si es urgente, llama a soporte.")
 

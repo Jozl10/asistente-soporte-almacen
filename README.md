@@ -20,6 +20,7 @@ api/app.py            la API REST de Flask, con manejo de errores y monitoreo
 interfaz/app.py       la pantalla de Streamlit (con su propio requirements.txt)
 interfaz/ejemplos/    tres capturas de ejemplo, con los datos personales tapados
 despliegue/           scripts y servicios para montar la API en la EC2 con el túnel
+demo_webview/         app de Flutter de ejemplo que abre el asistente en un WebView
 entrenar_texto.py     vuelve a entrenar el clasificador de intenciones
 calibrar_umbral.py    escoge el umbral del "no sé" con validación cruzada
 evaluar_ocr.py        mide el OCR con las capturas reales (solo números agregados)
@@ -58,6 +59,9 @@ Cada mensaje pasa por tres pasos:
   parece poco a como escriben los usuarios.
   - Con las 37 capturas reales que tienen ticket etiquetado, ese umbral quitó los 6 errores:
     acierta 10 y en las otras 27 pide la descripción. Lo mide `evaluar_ocr.py`.
+- **Mensaje que no dice el problema, con captura:** si el mensaje no se entiende, como "me
+  sale este aviso al entrar", pero lo leído en la captura sí pasa la barra de 0.2, se usa lo
+  leído. Si el mensaje sí se entiende, manda el mensaje.
 - **Con OCR, el plan pide la captura antes que el mensaje de error:** si de la captura se
   lee el mensaje, ya no se pregunta.
 
@@ -89,7 +93,8 @@ muestra lo que contesta el agente. Está pensada primero para la pantalla del es
 - **Dentro de la app de Flutter (WebView):** la dirección trae los datos de la sesión y el
   asistente no los pregunta, por ejemplo
   `?embed=true&aplicacion=inventario&sucursal=...&usuario=...`. Con `embed=true` se oculta
-  la barra de Streamlit.
+  la barra de Streamlit. `demo_webview/` es una app de ejemplo que lo hace; su README explica
+  el selector de archivos de Android y la versión mínima del WebView.
 - **Página pública de demostración:** sin esos datos. El asistente los pregunta cuando le
   hacen falta y cada respuesta trae el desplegable "Cómo lo decidió el asistente". Hay tres
   capturas de ejemplo para probar sin tener una del escáner.

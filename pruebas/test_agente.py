@@ -223,6 +223,29 @@ def test_lo_leido_con_puntuacion_baja_no_basta(service_desk, lector):
     assert r["accion"] == "planear_ticket"
 
 
+def test_si_el_mensaje_no_dice_el_problema_usa_lo_leido_en_la_captura(charla_ocr):
+    c = charla_ocr(DESDE_LA_APP)
+    r = c.decir("me sale este aviso al entrar", imagen=b"app_version")
+    assert c.estado["intencion"] == "actualizar_version"
+    assert r["accion"] == "planear_ticket"
+    assert c.estado["no_entendidos"] == 0
+    assert any(paso["detalle"].endswith("se usa lo leído") for paso in r["traza"])
+    assert c.estado["mensajes"] == ["me sale este aviso al entrar"]  # va en la descripción
+
+
+def test_si_lo_leido_tampoco_dice_el_problema_pide_otras_palabras(charla_ocr):
+    c = charla_ocr(DESDE_LA_APP)
+    r = c.decir("me sale esto", imagen=b"app_menu")
+    assert r["accion"] == "pedir_reformular"
+    assert c.estado["no_entendidos"] == 1
+
+
+def test_si_el_mensaje_se_entiende_manda_el_mensaje_y_no_lo_leido(charla_ocr):
+    c = charla_ocr(DESDE_LA_APP)
+    c.decir("no puedo cerrar el inventario", imagen=b"app_version")
+    assert c.estado["intencion"] == "inv_no_cierra"
+
+
 def test_si_lo_leido_no_dice_el_problema_pide_descripcion(charla_ocr):
     c = charla_ocr(DESDE_LA_APP)
     r = c.decir("", imagen=b"app_menu")
